@@ -5,12 +5,11 @@ const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 
 const app = express();
+app.use(express.json());
 
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV === 'devlopment') {
   app.use(morgan('dev'));
 }
-
-app.use(express.json());
 
 app.use((req, res, next) => {
   console.log('Hello from the middle ware');
