@@ -11,10 +11,10 @@ if (process.env.NODE_ENV === 'devlopment') {
   app.use(morgan('dev'));
 }
 
-app.use((req, res, next) => {
-  console.log('Hello from the middle ware');
-  next();
-});
+// app.use((req, res, next) => {
+//   console.log('Hello from the middle ware');
+//   next();
+// });
 
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();

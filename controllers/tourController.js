@@ -1,4 +1,5 @@
 const Tour = require('../Models/tourModel');
+const APIFeatures = require('../APIFeatures/APIFeatures');
 
 exports.aliasTourController = async (req, res, next) => {
   req.query.sort = '-ratingsAverage%price';
@@ -7,46 +8,125 @@ exports.aliasTourController = async (req, res, next) => {
   next();
 };
 
+exports.getTourStates = async (req, res) => {
+  const totalTour = await Tour.countDocuments();
+
+  const stats = await Tour.aggregate([
+    {
+      $match: { ratingsAverage: { $gte: 4.5 } },
+    },
+    {
+      $group: {
+        _id: { $toUpper: '$difficulty' },
+        numTours: { $sum: 1 },
+        numRatings: { $sum: '$ratingsQuantity' },
+        avgRating: { $avg: '$ratingsAverage' },
+        avgPrice: { $avg: '$price' },
+        minPrice: { $min: '$price' },
+        maxPrice: { $max: '$price' },
+      },
+    },
+    {
+      $sort: { avgPrice: 1 },
+    },
+  ]);
+
+  res.status(200).json({
+    message: 'Success',
+    totalTour,
+    data: stats,
+  });
+};
+exports.getMonthlyPlan = async (req, res) => {
+  const year = req.params.year;
+
+  try {
+    const plan = await Tour.aggregate([
+      {
+        $unwind: '$startDates',
+      },
+      {
+        $match: {
+          startDates: {
+            $gte: new Date(`${year}-01-01`),
+            $lte: new Date(`${year}-12-31`),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { $month: '$startDates' },
+          numTourStarts: { $sum: 1 },
+          tour: { $push: '$name' },
+          difficulty: { $push: '$difficulty' },
+        },
+      },
+      {
+        $addFields: { month: '$_id' },
+      },
+      {
+        $project: { _id: 0 },
+      },
+      {
+        $sort: { numTourStarts: -1 },
+      },
+      {
+        $limit: 12,
+      },
+    ]);
+
+    res.status(200).json({
+      message: 'Success',
+      data: plan,
+    });
+  } catch (err) {
+    res.status(400).json({ status: 'fail', message: err.message });
+  }
+};
+
 exports.getAllTours = async (req, res) => {
   try {
-    const queryObj = Object.assign({}, req.query);
+    // const queryObj = Object.assign({}, req.query);
 
-    //Filtering
-    const excludedFields = ['page', 'sort', 'limit', 'field'];
-    excludedFields.forEach((el) => delete queryObj[el]);
+    // //Filtering
+    // const excludedFields = ['page', 'sort', 'limit', 'field'];
+    // excludedFields.forEach((el) => delete queryObj[el]);
 
-    let query = Tour.find(queryObj);
+    // let query = Tour.find();
 
     //Sorting
-    if (req.query.sort) {
-      const sortingItems = req.query.sort.split('%').join(' ');
-      query = query.sort(sortingItems);
-    } else {
-      query = query.sort('-createdAt');
-    }
+    // if (req.query.sort) {
+    //   const sortingItems = req.query.sort.split('%').join(' ');
+    //   query = query.sort(sortingItems);
+    // } else {
+    //   query = query.sort('-createdAt');
+    // }
 
     //Field limiting
-    if (req.query.field) {
-      const fields = req.query.field.split('%').join(' ');
-      query = query.select(fields);
-    } else {
-      query = query.select('-__v');
-    }
+    // if (req.query.field) {
+    //   const fields = req.query.field.split('%').join(' ');
+    //   query = query.select(fields);
+    // } else {
+    //   query = query.select('-__v');
+    // }
 
     //Pagination
-    const page = req.query.page * 1 || 1;
-    const limit = req.query.limit * 1 || 10;
-    const skip = (page - 1) * limit;
+    // const page = req.query.page * 1 || 1;
+    // const limit = req.query.limit * 1 || 10;
+    // const skip = (page - 1) * limit;
 
-    if (req.query.page) {
-      const count = await Tour.countDocuments();
-      console.log(count, skip);
-      if (count <= skip) throw new Error('Page does not exist');
-    }
-    query = query.skip(skip).limit(limit);
+    // if (req.query.page) {
+    //   const count = await Tour.countDocuments();
+    //   console.log(count, skip);
+    //   if (count <= skip) throw new Error('Page does not exist');
+    // }
+    // query = query.skip(skip).limit(limit);
 
     //Excecute query
-    const tours = await query;
+    const features = new APIFeatures(Tour.find(), req.query);
+    features.filter().sort().limitFields().paginate(Tour.countDocuments());
+
+    const tours = await features.query;
 
     res.status(200).json({
       message: 'Success',
