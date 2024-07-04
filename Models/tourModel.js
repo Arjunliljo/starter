@@ -7,6 +7,11 @@ const tourSchema = new mongoose.Schema(
       required: [true, 'Tour must have a name'],
       trim: true,
       unique: true,
+      maxlength: [40, 'A Tour name must be less than or equal 40 characters'],
+      minlength: [
+        10,
+        'A Tour name must be greaterthan or equal to 10 characters',
+      ],
     },
     slug: String,
     duration: {
@@ -20,10 +25,16 @@ const tourSchema = new mongoose.Schema(
     difficulty: {
       type: String,
       required: [true, 'Tour must have a dificulty'],
+      enum: {
+        values: ['easy', 'medium', 'difficult'],
+        message: 'Difficulty must be easy, medium or difficult',
+      },
     },
     ratingsAverage: {
       type: Number,
       default: 4.5,
+      min: [1, 'A Tour must have rating gte 1'],
+      max: [5, 'A Tour mus have rating lte 5'],
     },
     ratingsQuantity: {
       type: Number,
@@ -43,7 +54,17 @@ const tourSchema = new mongoose.Schema(
       trim: true,
     },
 
-    priceDiscount: Number,
+    priceDiscount: {
+      type: Number,
+      default: 10,
+      validate: {
+        validator: function (val) {
+          //THIS IS ONLY WORK WHILE CREATING THE DOCUMENT NOT UPDATING --IMPORTANT
+          return val < this.price;
+        },
+        message: 'Discount must below the actual price',
+      },
+    },
 
     imageCover: {
       type: String,
@@ -60,7 +81,6 @@ const tourSchema = new mongoose.Schema(
     startDates: [Date],
     secretTour: {
       type: Boolean,
-      select: false,
       default: false,
     },
   },
@@ -107,7 +127,10 @@ tourSchema.post(/^find/, function (docs, next) {
 });
 
 //AGGREGATION MIDDLEWARE
-tourSchema.pre('aggregate', function (next) {});
+tourSchema.pre('aggregate', function (next) {
+  this.pipeline().unshift({ $match: { secretTour: { $ne: true } } });
+  next();
+});
 
 const Tour = mongoose.model('Tour', tourSchema);
 
