@@ -1,6 +1,17 @@
 const dotenv = require('dotenv');
 dotenv.config();
 
+process.on('uncaughtException', (err) => {
+  console.log(err.name, err.message);
+  console.log(`UNHANDLED EXCEPTION , Shutting down...`);
+  process.exit(1);
+});
+process.on('unhandledRejection', (err) => {
+  console.log(err.name, err.message);
+  console.log(`UNHANDLED REJECTION , Shutting down...`);
+  server.close(() => process.exit(1));
+});
+
 const { default: mongoose } = require('mongoose');
 const app = require('./app');
 
@@ -9,17 +20,12 @@ const DATA_BASE = process.env.CONNECTION_STR.replace(
   process.env.DB_PASSWORD,
 );
 
-mongoose
-  .connect(DATA_BASE)
-  .then((con) => {
-    console.log('Database connected..');
-  })
-  .catch((err) => {
-    console.error('Database connection error:', err);
-  });
+mongoose.connect(DATA_BASE).then((con) => {
+  console.log('Database connected..');
+});
 
 const port = process.env.PORT || 3000;
 
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log('App running on port ' + port);
 });
