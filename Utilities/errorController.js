@@ -15,7 +15,6 @@ const sendErrProd = (err, res) => {
     return res
       .status(500)
       .json({ status: 'failed', message: 'Something Went Wrong' });
-
   res.status(err.statusCode).json({
     status: err.status,
     message: err.message,
@@ -45,11 +44,12 @@ module.exports = (err, req, res, next) => {
   err.status = err.status || 'error';
   err.isOperational = err.isOperational || false;
 
-  console.log(err.name);
   if (process.env.NODE_ENV === 'development') {
     sendErrDev(err, res);
   } else if (process.env.NODE_ENV === 'production') {
     let error = { ...err };
+    error.message = err.message;
+    error.name = err.name;
 
     //Catching invalid ID
     if (err.name === 'CastError') error = handleCastErrorDB(err);
