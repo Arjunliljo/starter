@@ -6,7 +6,7 @@ const catchAsync = require('../Utilities/catchAsync');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: 5,
+    expiresIn: '90d',
   });
 };
 
@@ -16,6 +16,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     email: req.body.email,
     password: req.body.password,
     confirmPassword: req.body.confirmPassword,
+    changePasswordDate: req.body.changePasswordDate,
   });
 
   const token = generateToken(newUser._id);
@@ -67,11 +68,25 @@ exports.protect = catchAsync(async (req, res, next) => {
     );
 
   // 2) Varify token
-  const verify = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-  console.log(verify);
-  // 3) Check the user is still exist
+  const decode = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
 
-  // 4) Check the password is changed after the token is issued
+  // 3) Check the user is still exist to make sure
+  const currentUser = await User.findById(decode.id);
 
+  if (!currentUser)
+    return next(new AppError('The User belong to this token is not exist'));
+
+  // 4) Check the password is changed after the token is issued - changed password on one device logout in all devices
+  if (currentUser.changedPasswordAfter(decode.iat)) {
+    return next(
+      new AppError(
+        'The User recently changed password, Please login again',
+        401,
+      ),
+    );
+  }
+
+  //Grand access to the protected rout
+  req.user = currentUser;
   next();
 });

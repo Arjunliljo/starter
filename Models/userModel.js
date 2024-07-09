@@ -35,6 +35,9 @@ const userSchema = new mongoose.Schema({
       message: 'Password did not matching',
     },
   },
+  changePasswordDate: {
+    type: Date,
+  },
 });
 
 userSchema.pre('save', async function (next) {
@@ -55,6 +58,16 @@ userSchema.methods.correctPassword = async function (
   hashPassword,
 ) {
   return await bcrypt.compare(loginPassword, hashPassword);
+};
+
+userSchema.methods.changedPasswordAfter = function (jwtTimeStamb) {
+  if (this.changePasswordDate) {
+    const changedTimeStamb = parseInt(this.changePasswordDate.getTime()) / 1000;
+    console.log(jwtTimeStamb, changedTimeStamb);
+    return jwtTimeStamb < changedTimeStamb;
+  }
+
+  return false;
 };
 
 const User = mongoose.model('User', userSchema);

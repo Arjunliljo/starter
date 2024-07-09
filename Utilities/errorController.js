@@ -57,21 +57,22 @@ module.exports = (err, req, res, next) => {
     let error = { ...err };
     error.message = err.message;
     error.name = err.name;
+    console.log(error.name);
 
     //Catching invalid ID
-    if (err.name === 'CastError') error = handleCastErrorDB(err);
+    if (error.name === 'CastError') error = handleCastErrorDB(err);
 
     //Catching duplicate Fields
-    if (err.code === 11000) error = handleDuplicateDB(err);
+    if (error.code === 11000) error = handleDuplicateDB(err);
 
     //Cathing Validation erro
-    if (err.name === 'ValidationError') error = handleValidationDB(err);
+    if (error.name === 'ValidationError') error = handleValidationDB(err);
 
     //Catching JWT token error
-    if (err.name === 'JsonWebTokenError') error = handleJwtErr(err);
+    if (error.name === 'JsonWebTokenError') error = handleJwtErr(err);
 
     //Catching JWT token expired error
-    if ((err.name = 'TokenExpiredError')) error = handleExpiredToken(err);
+    if (error.name === 'TokenExpiredError') error = handleExpiredToken(err);
 
     sendErrProd(error, res);
   }
