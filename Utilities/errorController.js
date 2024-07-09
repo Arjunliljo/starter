@@ -15,6 +15,7 @@ const sendErrProd = (err, res) => {
     return res
       .status(500)
       .json({ status: 'failed', message: 'Something Went Wrong' });
+
   res.status(err.statusCode).json({
     status: err.status,
     message: err.message,
@@ -39,6 +40,12 @@ const handleValidationDB = (err) => {
   return new AppError(message, 400);
 };
 
+const handleJwtErr = (err) =>
+  new AppError('Invalid Token, Please Login again', 401);
+
+const handleExpiredToken = (err) =>
+  new AppError('The Token was expired, Please Login again', 401);
+
 module.exports = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
@@ -59,6 +66,12 @@ module.exports = (err, req, res, next) => {
 
     //Cathing Validation erro
     if (err.name === 'ValidationError') error = handleValidationDB(err);
+
+    //Catching JWT token error
+    if (err.name === 'JsonWebTokenError') error = handleJwtErr(err);
+
+    //Catching JWT token expired error
+    if ((err.name = 'TokenExpiredError')) error = handleExpiredToken(err);
 
     sendErrProd(error, res);
   }

@@ -6,7 +6,7 @@ const catchAsync = require('../Utilities/catchAsync');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: '90d',
+    expiresIn: 5,
   });
 };
 
