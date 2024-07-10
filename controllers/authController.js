@@ -76,7 +76,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   if (!currentUser)
     return next(new AppError('The User belong to this token is not exist'));
 
-  // 4) Check the password is changed after the token is issued - changed password on one device logout in all devices
+  // 4) Check the password is changed after the token is issued
   if (currentUser.changedPasswordAfter(decode.iat)) {
     return next(
       new AppError(
