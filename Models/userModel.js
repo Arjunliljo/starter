@@ -38,6 +38,14 @@ const userSchema = new mongoose.Schema({
   changePasswordDate: {
     type: Date,
   },
+  role: {
+    type: String,
+    enum: {
+      values: ['USER', 'TOURGUIDE', 'LEADTOURGUIDE', 'ADMIN'],
+      message: 'Role must be user, tourguide, leadtourguide or an admin',
+    },
+    default: 'USER',
+  },
 });
 
 userSchema.pre('save', async function (next) {

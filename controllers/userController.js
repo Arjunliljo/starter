@@ -24,9 +24,9 @@ exports.updateUser = (req, res) => {
     status: 'Error',
   });
 };
-exports.deleteUser = (req, res) => {
-  res.status(500).json({
-    message: 'This rout is not yet defined',
-    status: 'Error',
-  });
-};
+exports.deleteUser = catchAsync(async (req, res) => {
+  await User.findByIdAndDelete(req.params.userId);
+  res
+    .status(204)
+    .json({ status: 'Success', message: 'Successfully deleted the User' });
+});

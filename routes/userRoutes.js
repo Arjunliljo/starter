@@ -14,6 +14,10 @@ router
   .route('/:userId')
   .get(userController.getUser)
   .patch(userController.updateUser)
-  .delete(userController.deleteUser);
+  .delete(
+    authController.protect,
+    authController.authorize('ADMIN', 'LEADTOURGUIDE'),
+    userController.deleteUser,
+  );
 
 module.exports = router;

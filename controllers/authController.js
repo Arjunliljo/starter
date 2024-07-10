@@ -11,13 +11,7 @@ const generateToken = (id) => {
 };
 
 exports.signup = catchAsync(async (req, res, next) => {
-  const newUser = await User.create({
-    name: req.body.name,
-    email: req.body.email,
-    password: req.body.password,
-    confirmPassword: req.body.confirmPassword,
-    changePasswordDate: req.body.changePasswordDate,
-  });
+  const newUser = await User.create(req.body);
 
   const token = generateToken(newUser._id);
 
@@ -59,13 +53,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   ) {
     token = req.headers.authorization.replace('Bearer', '').trim();
   }
-  if (!token)
-    return next(
-      new AppError(
-        'You are not logged in Please login to get access of tours',
-        401,
-      ),
-    );
+  if (!token) return next(new AppError('Please login to get access', 401));
 
   // 2) Varify token
   const decode = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
@@ -90,3 +78,18 @@ exports.protect = catchAsync(async (req, res, next) => {
   req.user = currentUser;
   next();
 });
+
+exports.authorize = (...roles) => {
+  return (req, res, next) => {
+    // Check if the user's role is included in the allowed roles
+    if (!roles.includes(req.user.role)) {
+      // If not, pass an error to the next middleware
+      return next(
+        new AppError('You do not have permission to perform this action', 403),
+      );
+    }
+
+    // If the user is authorized, proceed to the next middleware
+    next();
+  };
+};
