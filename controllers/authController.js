@@ -4,6 +4,7 @@ const User = require('../Models/userModel');
 const AppError = require('../Utilities/appError');
 const catchAsync = require('../Utilities/catchAsync');
 const sendEmail = require('../Utilities/email');
+const { token } = require('morgan');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -65,7 +66,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   if (!currentUser)
     return next(new AppError('The User belong to this token is not exist'));
 
-  // 4) Check the password is changed after the token is issued ::
+  // 4) Check the password is changed after the token is issued 
   if (currentUser.changedPasswordAfter(decode.iat)) {
     return next(
       new AppError(
@@ -115,8 +116,6 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 
   const message = `Forgot your message ? submit a patch request with your new password and password confirm to : ${resetUrl} if you don't forgot your password please ignore this email`;
 
-  console.log(user.email);
-
   try {
     await sendEmail({
       email: user.email,
@@ -138,5 +137,47 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 });
 
 exports.resetPassword = catchAsync(async (req, res, next) => {
-  return null;
+  // 1) Get user from the token
+  const resetToken = req.params.resetToken;
+  const user = await User.findOne({
+    passwordResetToken: resetToken,
+    passwordResetExpires: { $gt: Date.now() },
+  }).select('+password');
+
+  // 2) If token has not expired and there is a user reset password
+  if (!user) return next(new AppError('Token is invalid or expired', 403));
+
+  user.password = req.body.password;
+  user.confirmPassword = req.body.confirmPassword;
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+  req.body.email = user.email;
+  await user.save();
+  // 3) update changed passwordAt property
+
+  // 4) Get the user logged in
+  exports.login(req, res, next);
+});
+
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  const { currentPassword, newPassword, confirmPassword } = req.body;
+
+  const user = await User.findById(req.user._id).select('+password');
+
+  // 1) Confirm this is the correct user
+  if (!(await user.correctPassword(currentPassword, user.password)))
+    return next(new AppError('Invalid Password...', 403));
+
+  // 2) If so update the password
+  user.password = newPassword;
+  user.confirmPassword = confirmPassword;
+
+  await user.save();
+  // 3) send the jwt token to the user
+  const token = generateToken(user._id);
+  res.status(200).json({
+    status: 'Success',
+    token,
+    message: 'Password Updated Successfully',
+  });
 });

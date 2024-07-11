@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
+const AppError = require('../Utilities/appError');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -24,7 +25,7 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, 'User must hava a password'],
-    min: [8, 'Password must have atleast 8 characters'],
+    minlength: [8, 'Password must have atleast 8 characters'],
     select: false,
   },
   confirmPassword: {
@@ -51,9 +52,19 @@ const userSchema = new mongoose.Schema({
   passwordResetExpires: Date,
 });
 
+userSchema.pre('save', function (next) {
+  if (!this.isModified('password') || this.isNew) return next();
+
+  this.changePasswordDate = Date.now();
+  next();
+});
+
 userSchema.pre('save', async function (next) {
   //make sure only run this if the password is modified
   if (!this.isModified('password')) return next();
+
+  if (this.confirmPassword !== this.password)
+    return next(new AppError('Password did not matching', 404));
 
   //hash the password
   this.password = await bcrypt.hash(this.password, 12);
@@ -71,6 +82,7 @@ userSchema.methods.correctPassword = async function (
   return await bcrypt.compare(loginPassword, hashPassword);
 };
 
+// protect middle ware using this
 userSchema.methods.changedPasswordAfter = function (jwtTimeStamb) {
   if (this.changePasswordDate) {
     const changedTimeStamb = parseInt(this.changePasswordDate.getTime()) / 1000;
@@ -85,8 +97,6 @@ userSchema.methods.createPasswordsResetToken = function () {
 
   this.passwordResetToken = resetToken;
   this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
-
-  console.log({ resetToken }, { docToken: this.passwordResetToken });
 
   return resetToken;
 };
