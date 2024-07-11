@@ -57,7 +57,6 @@ module.exports = (err, req, res, next) => {
     let error = { ...err };
     error.message = err.message;
     error.name = err.name;
-    console.log(error.name);
 
     //Catching invalid ID
     if (error.name === 'CastError') error = handleCastErrorDB(err);
