@@ -51,6 +51,11 @@ const userSchema = new mongoose.Schema({
   },
   passwordResetToken: String,
   passwordResetExpires: Date,
+  active: {
+    type: Boolean,
+    // select: false,
+    default: true,
+  },
 });
 
 userSchema.pre('save', function (next) {
@@ -101,6 +106,12 @@ userSchema.methods.createPasswordsResetToken = function () {
 
   return resetToken;
 };
+
+//Qery middleware
+userSchema.pre(/^find/, function (next) {
+  this.find({ active: { $ne: false } });
+  next();
+});
 
 const User = mongoose.model('User', userSchema);
 

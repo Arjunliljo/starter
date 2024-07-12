@@ -4,7 +4,6 @@ const User = require('../Models/userModel');
 const AppError = require('../Utilities/appError');
 const catchAsync = require('../Utilities/catchAsync');
 const sendEmail = require('../Utilities/email');
-const { token } = require('morgan');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -12,18 +11,37 @@ const generateToken = (id) => {
   });
 };
 
+const cookieOptions = {
+  expires: new Date(
+    Date.now() + process.env.JWT_COOKIE_EXPIRES * 24 * 60 * 60 * 1000,
+  ),
+  httpOnly: true,
+};
+
+if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
+
+const createSendToken = (user, statusCode, res) => {
+  const token = generateToken(user._id);
+
+  res.cookie('jwt', token, cookieOptions);
+
+  user.password = undefined;
+  res.status(statusCode).json({ status: 'Success', token, data: user });
+};
+
 exports.signup = catchAsync(async (req, res, next) => {
   const newUser = await User.create(req.body);
 
-  const token = generateToken(newUser._id);
+  createSendToken(newUser, 201, res);
+  // const token = generateToken(newUser._id);
 
-  res.status(201).json({
-    status: 'Success',
-    token,
-    data: {
-      user: newUser,
-    },
-  });
+  // res.status(201).json({
+  //   status: 'Success',
+  //   token,
+  //   data: {
+  //     user: newUser,
+  //   },
+  // });
 });
 
 exports.login = catchAsync(async (req, res, next) => {
@@ -42,8 +60,10 @@ exports.login = catchAsync(async (req, res, next) => {
   }
 
   //if everything is okey send the token back to the client
-  const token = generateToken(user._id);
-  res.status(200).json({ status: 'Success', token });
+  createSendToken(user, 200, res);
+  // const token = generateToken(user._id);
+  // user.password = undefined;
+  // res.status(200).json({ status: 'Success', token, data: user });
 });
 
 exports.protect = catchAsync(async (req, res, next) => {
@@ -66,7 +86,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   if (!currentUser)
     return next(new AppError('The User belong to this token is not exist'));
 
-  // 4) Check the password is changed after the token is issued 
+  // 4) Check the password is changed after the token is issued
   if (currentUser.changedPasswordAfter(decode.iat)) {
     return next(
       new AppError(
@@ -109,7 +129,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
 
   //Generate the random reset token
   const resetToken = user.createPasswordsResetToken();
-  await user.save();
+  await user.save({ validateBeforeSave: false });
 
   //Send the token to user email
   const resetUrl = `${req.protocol}://${req.get('host')}/api/v1/users/reset/${resetToken}`;
@@ -174,10 +194,16 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
 
   await user.save();
   // 3) send the jwt token to the user
-  const token = generateToken(user._id);
-  res.status(200).json({
-    status: 'Success',
-    token,
-    message: 'Password Updated Successfully',
-  });
+
+  createSendToken(user, 200, res);
+
+  // const token = generateToken(user._id);
+  // res.status(200).json({
+  //   status: 'Success',
+  //   token,
+  //   message: 'Password Updated Successfully',
+  //   data: {
+  //     user,
+  //   },
+  // });
 });
