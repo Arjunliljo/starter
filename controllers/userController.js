@@ -2,26 +2,41 @@ const User = require('../Models/userModel');
 const catchAsync = require('../Utilities/catchAsync');
 const AppError = require('../Utilities/appError');
 
+const filterBody = (body, ...allowedFields) => {
+  const newObj = {};
+
+  Object.keys(body).forEach((el) => {
+    if (allowedFields.includes(el)) newObj[el] = body[el];
+  });
+
+  return newObj;
+};
+
 exports.updateMyData = catchAsync(async (req, res, next) => {
   if (req.body.password || req.body.confirmPassword)
     return next(
-      new AppError('This is not the route for updating password', 400),
+      new AppError(
+        'This is not the route for updating password please use /updatepassword',
+        400,
+      ),
     );
 
   if (!req.body.email && !req.body.name)
     return next(new AppError('datas not found..', 400));
 
-  const user = await User.findById({ _id: req.user._id });
+  const filterObj = filterBody(req.body, 'name', 'email');
 
-  user.email = req.body.email ? req.body.email : user.email;
-  user.name = req.body.name ? req.body.name : user.name;
-
-  await user.save();
+  const user = await User.findByIdAndUpdate(req.user._id, filterObj, {
+    runValidators: true,
+    new: true,
+  });
 
   res.status(200).json({
     status: 'Success',
     message: 'User data successfully updated',
-    user,
+    data: {
+      user,
+    },
   });
 });
 
