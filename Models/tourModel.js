@@ -84,7 +84,33 @@ const tourSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+    startLocation: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point',
+      },
+      coordinates: [Number],
+      address: String,
+      description: String,
+    },
+
+    locations: [
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point'],
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: String,
+      },
+    ],
   },
+  // Creating virtual data ie. field created from existing datas eg:- durationWeek
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },

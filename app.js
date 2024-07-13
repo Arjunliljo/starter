@@ -3,6 +3,9 @@ const morgan = require('morgan');
 const AppError = require('./Utilities/appError');
 const globalErrorHandler = require('./Utilities/errorController');
 
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
+
 // For limiting number of request from same IP address good security middleware
 const rateLimit = require('express-rate-limit');
 
@@ -18,6 +21,11 @@ const app = express();
 
 // Set security http headers
 app.use(helmet());
+
+// For Sanitization against noSql query injection
+app.use(mongoSanitize());
+
+//Data Sanitization against XSS
 
 // body parser : reading body from req.body
 // larger than 10kb file should not accepted by this
