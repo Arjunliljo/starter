@@ -11,7 +11,7 @@ const DATA_BASE = process.env.CONNECTION_STR.replace(
   process.env.DB_PASSWORD,
 );
 
-const tour = fs.readFileSync('./dev-data/data/tours-simple.json', 'utf-8');
+const tour = fs.readFileSync('./dev-data/data/tours.json', 'utf-8');
 
 //create data
 const importData = async () => {
