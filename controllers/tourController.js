@@ -123,6 +123,7 @@ exports.getAllTours = catchAsync(async (req, res, next) => {
   //Excecute query
   const features = new APIFeatures(Tour.find(), req.query);
   features.filter().sort().limitFields().paginate(Tour.countDocuments());
+
   const tours = await features.query;
 
   res.status(200).json({

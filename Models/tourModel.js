@@ -123,6 +123,7 @@ const tourSchema = new mongoose.Schema(
   },
 );
 
+//Virtual Field creation
 tourSchema.virtual('durationWeek').get(function () {
   return Math.round(this.duration / 7);
 });
@@ -155,6 +156,15 @@ tourSchema.pre(/^find/, function (next) {
   this.find({ secretTour: { $ne: true } });
 
   this.start = Date.now();
+  next();
+});
+
+tourSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: 'guides',
+    select: '-__v -passwordChangedAt -_id',
+  });
+
   next();
 });
 
