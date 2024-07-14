@@ -109,6 +109,12 @@ const tourSchema = new mongoose.Schema(
         day: String,
       },
     ],
+    guides: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+      },
+    ],
   },
   // Creating virtual data ie. field created from existing datas eg:- durationWeek
   {
@@ -131,6 +137,11 @@ tourSchema.pre('save', function (next) {
   console.log(`${this.name} will be saved...`);
   next();
 });
+
+// tourSchema.pre('save', async function () {
+//   const guidesPromise = this.guides.map((id) => User.findById(id));
+//   this.guides = await Promise.all(guidesPromise);
+// });
 
 // // runs after the file has been saved
 // tourSchema.post('save', function (doc, next) {
