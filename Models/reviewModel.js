@@ -16,7 +16,7 @@ const reviewSchema = new mongoose.Schema({
   rating: {
     type: Number,
     min: [1, 'rating should atleast 1'],
-    max: [2, 'rating should maximum 5'],
+    max: [5, 'rating should maximum 5'],
     required: [true, 'Review Must have a rating..'],
   },
 
@@ -31,6 +31,12 @@ const reviewSchema = new mongoose.Schema({
     ref: 'User',
     required: [true, 'Review should belongs to a User'],
   },
+});
+
+reviewSchema.pre(/^find/, function (next) {
+  this.populate({ path: 'tour', select: 'name' });
+  this.populate({ path: 'user', select: '-__v -changePasswordDate' });
+  next();
 });
 
 const Review = mongoose.model('Review', reviewSchema);
