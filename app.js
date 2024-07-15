@@ -14,6 +14,7 @@ const helmet = require('helmet');
 
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
+const reviewRouter = require('./routes/reviewRoutes');
 
 const app = express();
 
@@ -39,6 +40,7 @@ if (process.env.NODE_ENV === 'devlopment') {
 // Test middle ware
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
+  console.log(req.url);
   next();
 });
 
@@ -54,6 +56,7 @@ app.use('/api', limiter);
 
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/reviews', reviewRouter);
 
 app.all('*', (req, res, next) => {
   next(new AppError(`Cannot find the ${req.originalUrl} on the page !`, 404));

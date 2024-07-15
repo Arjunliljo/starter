@@ -2,8 +2,6 @@ const express = require('express');
 const router = express.Router();
 const tourController = require('../controllers/tourController');
 const authController = require('../controllers/authController');
-// tour middlewares
-// router.param('id', tourController.checkID);
 
 router
   .route('/top-5-cheap')
