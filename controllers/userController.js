@@ -51,18 +51,6 @@ exports.getAllUsers = catchAsync(async (req, res) => {
   res.status(200).json({ status: 'Success', data: { users } });
 });
 
-exports.getUser = (req, res) => {
-  res.status(500).json({
-    message: 'This rout is not yet defined',
-    status: 'Error',
-  });
-};
-exports.createUser = (req, res) => {
-  res.status(500).json({
-    message: 'This rout is not yet defined',
-    status: 'Error',
-  });
-};
+exports.getUser = factory.getOne(User);
 exports.updateUser = factory.updateOne(User);
-
 exports.deleteUser = factory.deleteOne(User);

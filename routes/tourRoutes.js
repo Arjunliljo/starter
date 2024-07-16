@@ -4,7 +4,7 @@ const tourController = require('../controllers/tourController');
 const authController = require('../controllers/authController');
 const reviewRouter = require('./reviewRoutes');
 
-router.use('/:tourId/reviews', reviewRouter);
+router.use('/:id/reviews', reviewRouter);
 
 router
   .route('/top-5-cheap')

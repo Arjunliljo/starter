@@ -37,3 +37,28 @@ exports.updateOne = (Model) =>
       },
     });
   });
+
+exports.createOne = (Model) =>
+  catchAsync(async (req, res, next) => {
+    // const newTour = new Tour({});
+    // newTour.save()
+    const document = await Model.create(req.body);
+    res.status(200).json({
+      message: 'Success',
+      data: {
+        document,
+      },
+    });
+  });
+
+exports.getOne = (Model, popOptions) =>
+  catchAsync(async (req, res, next) => {
+    let query = Model.findById(req.params.id);
+    if (popOptions) query.populate(popOptions);
+
+    const doc = await query;
+
+    if (!doc) return next(new AppError('No document found on this ID'));
+
+    res.status(200).json({ status: 'Success', doc });
+  });

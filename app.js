@@ -40,7 +40,6 @@ if (process.env.NODE_ENV === 'devlopment') {
 // Test middle ware
 app.use((req, res, next) => {
   req.requestTime = new Date().toISOString();
-  console.log(req.url);
   next();
 });
 

@@ -10,7 +10,7 @@ router
   .get(reviewController.getAllreview)
   .post(
     authController.protect,
-    authController.authorize('USER'),
+    reviewController.setTourIdAndUserId,
     reviewController.createReview,
   );
 
