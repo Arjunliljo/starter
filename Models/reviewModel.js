@@ -6,7 +6,7 @@ const reviewSchema = new mongoose.Schema(
   {
     review: {
       type: String,
-      require: [true, 'Review Must contains words..'],
+      required: [true, 'Review Must contains words..'],
     },
 
     createdAt: {
