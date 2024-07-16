@@ -1,6 +1,7 @@
 const User = require('../Models/userModel');
 const catchAsync = require('../Utilities/catchAsync');
 const AppError = require('../Utilities/appError');
+const factory = require('../controllers/handlerFactory');
 
 const filterBody = (body, ...allowedFields) => {
   const newObj = {};
@@ -68,9 +69,5 @@ exports.updateUser = (req, res) => {
     status: 'Error',
   });
 };
-exports.deleteUser = catchAsync(async (req, res) => {
-  await User.findByIdAndDelete(req.params.userId);
-  res
-    .status(204)
-    .json({ status: 'Success', message: 'Successfully deleted the User' });
-});
+
+exports.deleteUser = factory.deleteOne(User);

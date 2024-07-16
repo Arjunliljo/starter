@@ -1,8 +1,9 @@
 const express = require('express');
-const router = express.Router();
-
 const reviewController = require('../controllers/reviewController');
 const authController = require('../controllers/authController');
+
+// for this route its root is just '/' this we need tourId also we want to get the entire url thats why merge params
+const router = express.Router({ mergeParams: true });
 
 router
   .route('/')
