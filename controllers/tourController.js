@@ -159,22 +159,6 @@ exports.createTour = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.updateTour = catchAsync(async (req, res, next) => {
-  const updatedTour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
+exports.updateTour = factory.updateOne(Tour);
 
-  res.status(200).json({
-    message: 'Success',
-    data: {
-      tour: updatedTour,
-    },
-  });
-});
-
-// exports.deleteTour = catchAsync(async (req, res, next) => {
-//   await Tour.findByIdAndDelete(req.params.id);
-//   res.status(204).json({ message: 'Success', data: null });
-// });
 exports.deleteTour = factory.deleteOne(Tour);

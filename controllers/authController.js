@@ -193,17 +193,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   user.confirmPassword = confirmPassword;
 
   await user.save();
+
   // 3) send the jwt token to the user
-
   createSendToken(user, 200, res);
-
-  // const token = generateToken(user._id);
-  // res.status(200).json({
-  //   status: 'Success',
-  //   token,
-  //   message: 'Password Updated Successfully',
-  //   data: {
-  //     user,
-  //   },
-  // });
 });
