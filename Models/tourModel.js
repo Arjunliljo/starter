@@ -128,6 +128,13 @@ tourSchema.virtual('durationWeek').get(function () {
   return Math.round(this.duration / 7);
 });
 
+//Virtula populate
+tourSchema.virtual('reviews', {
+  ref: 'Review',
+  foreignField: 'tour',
+  localField: '_id',
+});
+
 //DOCUMENT MIDDLEWARE : runs before .save() cammand and .create() cammand
 tourSchema.pre('save', function (next) {
   // this.slug = slugify(this.name, { lower: true });

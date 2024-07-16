@@ -13,7 +13,7 @@ exports.getAllreview = catchAsync(async (req, res, next) => {
 });
 
 exports.getReview = catchAsync(async (req, res, next) => {
-  const review = await Review.find(req.params.reviewId);
+  const review = await Review.find({ _id: req.params.reviewId });
 
   res.status(200).json({ status: 'Success', data: { review } });
 });
