@@ -175,6 +175,10 @@ tourSchema.pre(/^find/, function (next) {
   next();
 });
 
+//For perphomence optimization while querying with price and ratingsAverage
+tourSchema.index({ price: 1, ratingsAverage: -1 });
+tourSchema.index({ slug: 1 });
+
 tourSchema.post(/^find/, function (docs, next) {
   // if we made a getAll resquest this we will not get this tour
   console.log(`Query took ${Date.now() - this.start} to process!`);
