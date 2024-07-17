@@ -12,16 +12,30 @@ router
 
 router.route('/tour-stats').get(tourController.getTourStates);
 
-router.route('/tour-plan/:year').get(tourController.getMonthlyPlan);
+router
+  .route('/tour-plan/:year')
+  .get(authController.protect, tourController.getMonthlyPlan);
 
 router
   .route('/')
   .get(tourController.getAllTours)
-  .post(tourController.createTour);
+  .post(
+    authController.protect,
+    authController.authorize('ADMIN'),
+    tourController.createTour,
+  );
 router
   .route('/:id')
   .get(tourController.getTour)
-  .patch(tourController.updateTour)
-  .delete(authController.protect, tourController.deleteTour);
+  .patch(
+    authController.protect,
+    authController.authorize('ADMIN'),
+    tourController.updateTour,
+  )
+  .delete(
+    authController.protect,
+    authController.authorize('ADMIN'),
+    tourController.deleteTour,
+  );
 
 module.exports = router;

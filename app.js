@@ -4,7 +4,6 @@ const AppError = require('./Utilities/appError');
 const globalErrorHandler = require('./Utilities/errorController');
 
 const mongoSanitize = require('express-mongo-sanitize');
-const xss = require('xss-clean');
 
 // For limiting number of request from same IP address good security middleware
 const rateLimit = require('express-rate-limit');
