@@ -1,7 +1,9 @@
 const express = require('express');
 const morgan = require('morgan');
+const path = require('path');
 const AppError = require('./Utilities/appError');
 const globalErrorHandler = require('./Utilities/errorController');
+const app = express();
 
 const mongoSanitize = require('express-mongo-sanitize');
 
@@ -15,7 +17,9 @@ const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 
-const app = express();
+app.set('view engine', 'pug');
+app.set('views', path.join(__dirname, 'views'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 //GLOBAL MIDDLEWARES
 
@@ -51,6 +55,10 @@ const limiter = rateLimit({
 
 // Limiting requests from a single IP
 app.use('/api', limiter);
+
+app.use('/', (req, res) => {
+  res.status(200).render('base');
+});
 
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
