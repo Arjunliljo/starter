@@ -36,6 +36,9 @@ const tourSchema = new mongoose.Schema(
       default: 4.5,
       min: [1, 'A Tour must have rating gte 1'],
       max: [5, 'A Tour mus have rating lte 5'],
+
+      // runs whenever ratingsAverage value is updated eg : when we create new review or delete
+      set: (val) => Math.round(val * 10) / 10,
     },
     ratingsQuantity: {
       type: Number,
