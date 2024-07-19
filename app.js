@@ -56,8 +56,11 @@ const limiter = rateLimit({
 // Limiting requests from a single IP
 app.use('/api', limiter);
 
+//Dinamic rendering html using pug
 app.use('/', (req, res) => {
-  res.status(200).render('base');
+  res
+    .status(200)
+    .render('base', { name: 'The Forrest Hiker', user: 'Arjun Liljo' });
 });
 
 app.use('/api/v1/tours', tourRouter);
