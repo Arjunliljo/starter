@@ -1,7 +1,7 @@
 doctype html
 html
     head
-        title Natours
+        title Natours | #{title}
         link(rel='stylesheet' href='/css/style.css')
         link(rel='shortcut icon' type='image/png' href='/img/favicon.png')
     body
@@ -9,8 +9,8 @@ html
         include _header
       
         // Content
-        main.main 
-            h1= tour     
+        block content 
+            h1 This is the base    
 
         // Footer
         include _footer

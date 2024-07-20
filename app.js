@@ -16,6 +16,7 @@ const helmet = require('helmet');
 const tourRouter = require('./routes/tourRoutes');
 const userRouter = require('./routes/userRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
+const viewRoutes = require('./routes/viewRoutes');
 
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
@@ -57,11 +58,7 @@ const limiter = rateLimit({
 app.use('/api', limiter);
 
 //Dinamic rendering html using pug
-app.use('/', (req, res) => {
-  res
-    .status(200)
-    .render('base', { tour: 'The Forrest Hiker', user: 'Arjun Liljo' });
-});
+app.use('/', viewRoutes);
 
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
