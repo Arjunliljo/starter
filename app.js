@@ -60,7 +60,7 @@ app.use('/api', limiter);
 app.use('/', (req, res) => {
   res
     .status(200)
-    .render('base', { name: 'The Forrest Hiker', user: 'Arjun Liljo' });
+    .render('base', { tour: 'The Forrest Hiker', user: 'Arjun Liljo' });
 });
 
 app.use('/api/v1/tours', tourRouter);
