@@ -13,7 +13,7 @@ process.on('unhandledRejection', (err) => {
 });
 
 const { default: mongoose } = require('mongoose');
-const app = require('./app');
+const app = require('../app');
 
 const DATA_BASE = process.env.CONNECTION_STR.replace(
   '<PASSWORD>',
